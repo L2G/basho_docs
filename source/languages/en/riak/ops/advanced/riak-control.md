@@ -133,6 +133,16 @@ will be available.
 {admin, true}
 ```
 
+### Low Memory
+
+Riak Control will report nodes with less than `low_mem_watermark` free RAM as
+low memory on the current snapshot.  This is a percentage from 0-1, default 0.1.
+
+```erlang
+%% Threshold to report nodes as having a low memory condition
+{low_mem_watermark, 0.1}
+```
+
 ## User Interface
 
 Navigate to <https://localhost:8069/admin>.
