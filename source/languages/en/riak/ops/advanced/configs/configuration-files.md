@@ -397,14 +397,17 @@ The default lager options are like so:
         ]},
      ]},
      
-    %% Whether to write a crash log, and where. Undefined means no crash logger.
+    %% Whether to write a crash log, and where. 
+    %% Undefined means no crash logger.
     {crash_log, "{{platform_log_dir}}/crash.log"},
      
-    %% Maximum size in bytes of events in the crash log - defaults to 65536
+    %% Maximum size in bytes of events in the crash log
+    %% defaults to 65536
     {crash_log_msg_size, 65536},
                    
-    %% Maximum size of the crash log in bytes, before its rotated, set
-    %% to 0 to disable rotation - default is 0
+    %% Maximum size of the crash log in bytes, before it
+    %% is rotated, set to 0 to disable rotation
+    %% default is 0
     {crash_log_size, 10485760},
 
     %% What time to rotate the crash log - default is no time
@@ -415,17 +418,20 @@ The default lager options are like so:
     %% current one - default is 0
     {crash_log_count, 5},
 
-    %% Whether to redirect error_logger messages into lager - defaults to true
+    %% Whether to redirect error_logger messages into lager
+    %% defaults to true
     {error_logger_redirect, true},
 
-    %% How many messages per second to allow from error_logger before we start dropping them
+    %% How many messages per second to allow from error_logger 
+    %% before we start dropping them
     {error_logger_hwm, 50},
 
-    %% How big the gen_event mailbox can get before it is switched into sync mode
+    %% How big the gen_event mailbox can get before it is switched 
+    %% into sync mode
     {async_threshold, 20},
 
-    %% Switch back to async mode, when gen_event mailbox size decrease from `async_threshold'
-    %% to async_threshold - async_threshold_window
+    %% Switch back to async mode, when gen_event mailbox size 
+    %% decreases to async_threshold - async_threshold_window
     {async_threshold_window, 5}
 
     %%colored terminal output
