@@ -391,15 +391,128 @@ The default lager options are like so:
 {lager, [
     {handlers, [
         {lager_console_backend, info},
-            {lager_file_backend, [
-                {"/opt/riak/log/error.log", error},
-                {"/opt/riak/log/console.log", info}
-                ]}
-                ]},.
-                {crash_log, "{{platform_log_dir}}/crash.log"},
-                {crash_log_size, 65536},
-                {error_logger_redirect, true}
-                ]},
+        {lager_file_backend, [
+            {"/opt/riak/log/error.log", error},
+            {"/opt/riak/log/console.log", info}
+        ]},
+     ]},
+     
+    %% Whether to write a crash log, and where. Undefined means no crash logger.
+    {crash_log, "{{platform_log_dir}}/crash.log"},
+     
+    %% Maximum size in bytes of events in the crash log - defaults to 65536
+    {crash_log_msg_size, 65536},
+                   
+    %% Maximum size of the crash log in bytes, before its rotated, set
+    %% to 0 to disable rotation - default is 0
+    {crash_log_size, 10485760},
+
+    %% What time to rotate the crash log - default is no time
+    %% rotation. See the README for a description of this format.
+    {crash_log_date, "$D0"},
+
+    %% Number of rotated crash logs to keep, 0 means keep only the
+    %% current one - default is 0
+    {crash_log_count, 5},
+
+    %% Whether to redirect error_logger messages into lager - defaults to true
+    {error_logger_redirect, true},
+
+    %% How many messages per second to allow from error_logger before we start dropping them
+    {error_logger_hwm, 50},
+
+    %% How big the gen_event mailbox can get before it is switched into sync mode
+    {async_threshold, 20},
+
+    %% Switch back to async mode, when gen_event mailbox size decrease from `async_threshold'
+    %% to async_threshold - async_threshold_window
+    {async_threshold_window, 5}
+
+    %%colored terminal output
+    {colored, false}
+]},
+```
+#### Overload Protection
+Prior to lager 2.0, the gen_event at the core of lager operated purely in synchronous mode. Asynchronous mode is faster, but has no protection against message queue overload. In lager 2.0, the gen_event takes a hybrid approach. it polls its own mailbox size and toggles the messaging between synchronous and asynchronous depending on mailbox size.
+
+```erlang
+{async_threshold, 20},
+{async_threshold_window, 5}
+```
+
+This will use async messaging until the mailbox exceeds 20 messages, at which point synchronous messaging will be used, and switch back to asynchronous, when size reduces to 20 - 5 = 15.
+
+If you wish to disable this behaviour, simply set it to 'undefined'. It defaults to a low number to prevent the mailbox growing rapidly beyond the limit and causing problems. In general, lager should process messages as fast as they come in, so getting 20 behind should be relatively exceptional anyway.
+
+If you want to limit the number of messages per second allowed from error_logger, which is a good idea if you want to weather a flood of messages when lots of related processes crash, you can set a limit:
+
+```erlang
+{error_logger_hwm, 200}
+```
+
+#### Log File Rotation
+Lager can rotate its own logs or have it done via an external process. To use internal rotation, use the 'size', 'date' and 'count' values in the file backend's config:
+
+```erlang
+[{name, "error.log"}, {level, error}, {size, 10485760}, {date, "$D0"}, {count, 5}]
+```
+
+The syntax for the `date` field is taken from the `when` section of [newsyslog.conf( http://www.freebsd.org/cgi/man.cgi?query=newsyslog.conf&sektion=5)
+
+Day, week and month time format: The lead-in character
+for day, week and month specification is a `$'-sign.
+The particular format of day, week and month
+specification is: [Dhh], [Ww[Dhh]] and [Mdd[Dhh]],
+respectively.  Optional time fields default to
+midnight.  The ranges for day and hour specifications are:
+
+        hh      hours, range 0 ... 23
+        w       day of week, range 0 ... 6, 0 = Sunday
+        dd      day of month, range 1 ... 31, or the
+        letter L or l to specify the last day of the month.
+
+        Some examples:
+        $D0     rotate every night at midnight
+        $D23    rotate every day at 23:00 hr
+        $W0D23  rotate every week on Sunday at 23:00 hr
+        $W5D16  rotate every week on Friday at 16:00 hr
+        $M1D0   rotate on the first day of every month at midnight (i.e., the start of the day)
+        $M5D6   rotate on every 5th day of the month at 6:00 hr
+
+#### Traces
+
+Traces can be configured at startup by adding the following to the lager configuration section:
+
+```
+{traces,[
+   {handler1,filter1,level1},
+   ...
+   {handler2,filter2,level2}
+]},
+
+Refer to [Lager Tracing](https://github.com/basho/lager#tracing) for more information.
+
+#### Colored Terminal Output
+
+If you have erlang R16 or higher, you can tell lager's console backend to be colored. Simply add the followint to lager's application environment config:
+
+```erlang
+{colored, true}
+```
+
+If you don't like the default colors, they are also configurable, using ANSI escape sequences.  The default colors are:
+
+```erlang
+{colors, [
+    {debug,     "\e[0;38m" },
+    {info,      "\e[1;37m" },
+    {notice,    "\e[1;36m" },
+    {warning,   "\e[1;33m" },
+    {error,     "\e[1;31m" },
+    {critical,  "\e[1;35m" },
+    {alert,     "\e[1;44m" },
+    {emergency, "\e[1;41m" }
+]}
 ```
 
 ## vm.args
