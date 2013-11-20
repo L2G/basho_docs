@@ -35,6 +35,9 @@ riak:
               - "[[PHP|Taste of Riak: Querying with PHP]]"
               - "[[Python|Taste of Riak: Querying with Python]]"
               - "[[Ruby|Taste of Riak: Querying with Ruby]]"
+          - title: A Taste of Search
+            sub:
+              - "[[Search Introduction|Taste of Riak: Search]]"
       - title: "Querying Riak"
         sub:
           - "[[The Basics]]"
